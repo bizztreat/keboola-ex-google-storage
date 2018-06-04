@@ -151,7 +151,7 @@ class Extractor:
 			if (item["name"].lower().endswith(".csv")):
 				global debugMode
 				#if debugMode: print("Skipping %s, a .csv file, we are interested in the archives"%item["name"])
-				continue
+				continue #remove to download all .csv files as well
 				objects = [self.GetObject(item["name"])]
 			else:
 				print("Running archive:",item["name"])
