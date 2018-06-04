@@ -36,6 +36,8 @@ else:
 	debugMode = int(config["parameters"]["debug_mode"])
 	maxResults = config["parameters"]["max_results"]
 
+accepted_dirnames = ["acquisition_subscribers", "financial-stats_subscriptions", "stats_installs", "earnings", "sales"]
+
 #fileBufferSize = 16 * 1024 * 1024 #16 MB
 a_token = None
 token_expiration = None
@@ -147,11 +149,15 @@ class Extractor:
 			objects.append(o)
 		return objects
 	def AppendItems(self,items):
+		global debugMode
 		for item in items:
+			dname = os.path.dirname(item["name"]).replace("/","_")
+			if dname not in accepted_dirnames:
+				continue
 			if (item["name"].lower().endswith(".csv")):
-				global debugMode
 				#if debugMode: print("Skipping %s, a .csv file, we are interested in the archives"%item["name"])
-				continue #remove to download all .csv files as well
+				#continue #remove to download all .csv files as well
+				print("Running .csv file:",item["name"])
 				objects = [self.GetObject(item["name"])]
 			else:
 				print("Running archive:",item["name"])
@@ -164,7 +170,7 @@ class Extractor:
 				h = rows.pop(0)
 				md = MD5(str(h))
 				if (not Header.Exists(md)):
-					header = Header(h,md,open("/data/out/tables/%s.csv"%os.path.dirname(item["name"]),"w"))
+					header = Header(h,md,open("/data/out/tables/%s.csv"%os.path.dirname(item["name"]).replace("/","_"),"w"))
 					writer = csv.writer(header.Handle)
 					writer.writerow(h)
 				else:
@@ -188,8 +194,9 @@ if __name__=="__main__":
 		if debugMode:
 			print("Wrote another %d items, total %d written so far" % (len(items),total))
 			if interactive_mode:
-				c = input("Do you want to continue? Y/N ").lower()
-				if (c!="y"): break
+				#c = input("Do you want to continue? Y/N ").lower()
+				#if (c!="y"): break
+				pass
 		items = ex.ListObjects()
 	ex.TidyUp()
 	print("Done writing results.")
