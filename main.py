@@ -36,7 +36,7 @@ else:
 	debugMode = int(config["parameters"]["debug_mode"])
 	maxResults = config["parameters"]["max_results"]
 
-accepted_dirnames = ["acquisition_subscribers", "financial-stats_subscriptions", "stats_installs", "earnings", "sales"]
+accepted_dirnames = ["earnings", "sales"]
 
 #fileBufferSize = 16 * 1024 * 1024 #16 MB
 a_token = None
