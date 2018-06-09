@@ -157,6 +157,8 @@ class Extractor:
 			if (item["name"].lower().endswith(".csv")):
 				#if debugMode: print("Skipping %s, a .csv file, we are interested in the archives"%item["name"])
 				#continue #remove to download all .csv files as well
+				if not "acquisition/subscribers" not in item["name"] or not item["name"].lower().endswith("_country.csv"):
+					continue
 				print("Running .csv file:",item["name"])
 				objects = [self.GetObject(item["name"])]
 			else:
