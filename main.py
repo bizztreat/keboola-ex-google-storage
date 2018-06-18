@@ -45,7 +45,7 @@ else:
 	if debugMode: print("Will accept only: %s"%",".join(accepted_dirnames))
 
 #Temporary override - KBC configuration schema does not seem to work properly
-accepted_dirnames = ["installs","subscriptions"]
+accepted_dirnames = ["installs","subscriptions", "sales", "earnings"]
 #fileBufferSize = 16 * 1024 * 1024 #16 MB
 a_token = None
 token_expiration = None
