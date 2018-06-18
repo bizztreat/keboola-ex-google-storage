@@ -155,6 +155,9 @@ class Extractor:
 			o = z.read(f).decode("utf-8")
 			if o[-1]=="\n": o=o[:-1]
 			objects.append(o)
+		global debugMode
+		if debugMode:
+			print("ZIP contained %d objects"%len(objects))
 		return objects
 	def AppendItems(self,items):
 		global debugMode
@@ -213,6 +216,8 @@ class Extractor:
 						tableName = newTableName
 					tablePath = os.path.join("/data/out/tables/",tableName)
 					header = Header(h,md,open(tablePath,"w"))
+					if debugMode:
+						print("Created new output \'%s\'"%tablePath)
 					writer = csv.writer(header.Handle)
 					writer.writerow(h)
 				else:
