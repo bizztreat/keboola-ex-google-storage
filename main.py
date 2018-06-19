@@ -110,6 +110,8 @@ class Extractor:
 		self.Headers = []
 		self.Handles = []
 		self.Writers = []
+		
+		self.INames = []
 	def RenewAccessToken(self):
 		global token_endpoint, token_expiration, user_agent
 		self.Credentials = client.GoogleCredentials(self.a_token,self.client_id,self.client_sercret,self.r_token,token_expiration,token_endpoint,user_agent)
@@ -182,6 +184,7 @@ class Extractor:
 					continue
 				iname = sre.group(1+reskip)
 				idimension = sre.group(5+reskip)
+				self.INames.append(iname)
 				if iname not in accepted_dirnames:
 					if debugMode:
 						print("Skipping %s, not wanted."%iname)
@@ -251,5 +254,7 @@ if __name__=="__main__":
 		items = ex.ListObjects()
 	ex.TidyUp()
 	print("Done writing results.")
+	ex.INames = list(set(ex.INames))
+	print(ex.INames)
 	if interactive_mode:
 		input("Waiting for your debugging work to be done. When ready, press ENTER")
