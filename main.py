@@ -207,12 +207,14 @@ class Extractor:
 				if len(rows)==0: continue
 				h = rows.pop(0)
 				md = MD5(str(h))
+				print("Header hash: %s"%md)
 				if (not Header.Exists(md)):
+					print("Header is new")
 					if iname!=None:
 						tableName = "%s_%s.csv"%(iname,idimension)
 					else:
 						tableName = "%s.csv"%os.path.dirname(item["name"]).replace("/","_")
-						print("Probably zip, output table name: %s"%tableName)
+					print("Attempting new output table name: %s"%tableName)
 					if os.path.exists(os.path.join("/data/out/tables/",tableName)): #table is from same output/dimension but has a different header
 						if debugMode:
 							print("Data inconsistency occurred while parsing %s. I will try to manage"%item["name"])
@@ -229,6 +231,7 @@ class Extractor:
 					writer = csv.writer(header.Handle)
 					writer.writerow(h)
 				else:
+					print("Header already in db")
 					header = Header.Get(md)
 					writer = csv.writer(header.Handle)
 				for row in rows:
