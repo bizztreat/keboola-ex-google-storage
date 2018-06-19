@@ -164,10 +164,10 @@ class Extractor:
 		return objects
 	def AppendItems(self,items):
 		global debugMode
-		iname = None
-		idimension = None
-		isZip = False
 		for item in items:
+			iname = None
+			idimension = None
+			isZip = False
 			dname = os.path.dirname(item["name"]).replace("/","_")
 			if (item["name"].lower().endswith(".csv")):
 				if item["name"].count("/")==2:
