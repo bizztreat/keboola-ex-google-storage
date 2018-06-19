@@ -195,26 +195,26 @@ class Extractor:
 				#continue #remove to download all .csv files as well
 				objects = [self.GetObject(item["name"])]
 			else:
-				print("Running archive:",item["name"])
+				if debugMode: print("Running archive:",item["name"])
 				objects = self.GetZipObjects(item["name"])
 				isZip = True
-				print("ZIP returned %d objects"%len(objects))
+				if debugMode: print("ZIP returned %d objects"%len(objects))
 			for o in objects:
 				o = o.split("\n")
 				reader = csv.reader(o)
 				rows = list(reader)
-				print("No. of rows: %d"%len(rows))
+				if debugMode: print("No. of rows: %d"%len(rows))
 				if len(rows)==0: continue
 				h = rows.pop(0)
 				md = MD5(str(h))
-				print("Header hash: %s"%md)
+				if debugMode: print("Header hash: %s"%md)
 				if (not Header.Exists(md)):
-					print("Header is new")
+					if debugMode: print("Header is new")
 					if iname!=None:
 						tableName = "%s_%s.csv"%(iname,idimension)
 					else:
 						tableName = "%s.csv"%os.path.dirname(item["name"]).replace("/","_")
-					print("Attempting new output table name: %s"%tableName)
+					if debugMode: print("Attempting new output table name: %s"%tableName)
 					if os.path.exists(os.path.join("/data/out/tables/",tableName)): #table is from same output/dimension but has a different header
 						if debugMode:
 							print("Data inconsistency occurred while parsing %s. I will try to manage"%item["name"])
@@ -231,7 +231,7 @@ class Extractor:
 					writer = csv.writer(header.Handle)
 					writer.writerow(h)
 				else:
-					print("Header already in db")
+					if debugMode: print("Header already in db")
 					header = Header.Get(md)
 					writer = csv.writer(header.Handle)
 				for row in rows:
