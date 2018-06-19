@@ -26,7 +26,7 @@ if not os.path.exists("/data/config.json"):
 	bucket = input("Bucket name: ")
 	debugMode = 1
 	maxResults = int(input("Max results per page: "))
-	accepted_dirnames = ["installs", "subscribers", "subscriptions"]
+	accepted_dirnames = input("Comma-separated list of accepted dirnames: ")
 else:
 	with open("/data/config.json","r") as fid:
 		config = json.load(fid)
@@ -40,13 +40,14 @@ else:
 	debugMode = int(config["parameters"]["debug_mode"])
 	maxResults = config["parameters"]["max_results"]
 	accepted_dirnames = config["parameters"]["accepted_dirnames"] #preferably defaults to ["installs", "subscribers", "subscriptions"]
-	accepted_dirnames = list(map(str.strip,accepted_dirnames.split(",")))
-	if accepted_dirnames[-1]=="": accepted_dirnames=accepted_dirnames[:-1]
-	if debugMode: print("Will accept only: %s"%",".join(accepted_dirnames))
+
+accepted_dirnames = list(map(str.strip,accepted_dirnames.split(",")))
+if accepted_dirnames[-1]=="": accepted_dirnames=accepted_dirnames[:-1]
+if debugMode: print("Will accept only: %s"%",".join(accepted_dirnames))
 
 #Temporary override - KBC configuration schema does not seem to work properly
 #accepted_dirnames = ["installs","subscriptions", "sales", "earnings"]
-accepted_dirnames = [] #testing purpose only, let us download zips only
+#accepted_dirnames = [] #testing purpose only, let us download zips only
 #fileBufferSize = 16 * 1024 * 1024 #16 MB
 a_token = None
 token_expiration = None
@@ -112,6 +113,8 @@ class Extractor:
 		self.Writers = []
 		
 		self.INames = []
+		self.ExportedItems = 0
+		self.ExportedObjects  = 0
 	def RenewAccessToken(self):
 		global token_endpoint, token_expiration, user_agent
 		self.Credentials = client.GoogleCredentials(self.a_token,self.client_id,self.client_sercret,self.r_token,token_expiration,token_endpoint,user_agent)
@@ -196,6 +199,10 @@ class Extractor:
 				objects = [self.GetObject(item["name"])]
 			else:
 				if debugMode: print("Running archive:",item["name"])
+				if os.path.dirname(item["name"]).replace("/","_") not in accepted_dirnames:
+					if debugMode:
+						print("Skipping %s, not wanted."%item["name"])
+					continue
 				objects = self.GetZipObjects(item["name"])
 				isZip = True
 				if debugMode: print("ZIP returned %d objects"%len(objects))
@@ -236,6 +243,8 @@ class Extractor:
 					writer = csv.writer(header.Handle)
 				for row in rows:
 					writer.writerow(row)
+			self.ExportedObjects+=len(objects)
+			self.ExportedItems+=1
 	def TidyUp(self):
 		if self.Handle!=None: self.Handle.close()
 
