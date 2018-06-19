@@ -259,7 +259,7 @@ if __name__=="__main__":
 		ex.AppendItems(items)
 		total+=len(items)
 		if debugMode:
-			print("Wrote another %d items, total %d written so far" % (len(items),total))
+			print("Listed through another %d items, total %d listed so far" % (len(items),total))
 			if interactive_mode:
 				#c = input("Do you want to continue? Y/N ").lower()
 				#if (c!="y"): break
@@ -268,6 +268,8 @@ if __name__=="__main__":
 	ex.TidyUp()
 	print("Done writing results.")
 	ex.INames = list(set(ex.INames))
-	print(ex.INames)
+	if debugMode:
+		print("List of dirnames I came by: ",ex.INames)
+		print("Exported totals: %d objects from %d items"%(ex.ExportedObjects,ex.ExportedItems))
 	if interactive_mode:
 		input("Waiting for your debugging work to be done. When ready, press ENTER")
