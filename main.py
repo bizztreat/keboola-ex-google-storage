@@ -199,6 +199,8 @@ class Extractor:
 				objects = self.GetZipObjects(item["name"])
 				isZip = True
 				print("ZIP returned %d objects"%len(objects))
+				print(objects)
+				input("Enter continues...")
 			for o in objects:
 				o = o.split("\n")
 				reader = csv.reader(o)
