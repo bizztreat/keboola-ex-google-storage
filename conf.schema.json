@@ -1,59 +1,67 @@
 {
-	"title": "Parameters",
 	"type": "object",
-	"properties": {
-		"#r_token": {
-			"title": "Refresh token",
-			"type": "string",
-			"format": "password",
-			"propertyOrder": 1,
-			"default": "",
-			"description": "Google API refresh token, best obtained at Google's OAuth2 Playground"
-		},
-		"client_id": {
-			"title": "Client ID",
-			"type": "string",
-			"propertyOrder": 2,
-			"default": "",
-			"description": "Google API client ID, you got that from Developer console"
-		},
-		"#client_secret": {
-			"title": "Client secret",
-			"type": "string",
-			"format": "password",
-			"propertyOrder": 3,
-			"default": "",
-			"description": "Google API client secret, you got that from Developer console"
-		},
-		"bucket_name": {
-			"title": "Bucket name",
-			"type": "string",
-			"propertyOrder": 4,
-			"default": "",
-			"description": "Name of the Google Storage bucket"
-		},
-		"debug_mode": {
-			"title": "Debug mode",
-			"type": "integer",
-			"enum": [0,
-			1],
-			"default": 0,
-			"description": "0 - standard output, 1 - more output",
-			"propertyOrder": 6
-		},
-		"max_results": {
-			"title": "Max results",
-			"type": "integer",
-			"propertyOrder": 5,
-			"default": 500,
-			"maximum": 1000,
-			"minimum": 10,
-			"description": "Number of objects loaded at once (10 - 1000, default 500). May influence performance, don't know what the best setting could be"
-		}
-	},
+	"title": "Parameters",
 	"required": ["#r_token",
 	"client_id",
 	"#client_secret",
 	"bucket_name",
-	"debug_mode"]
+	"debug_mode",
+	"accepted_dirnames"],
+	"properties": {
+		"#r_token": {
+			"type": "string",
+			"title": "Refresh token",
+			"format": "password",
+			"default": "",
+			"description": "Google API refresh token, best obtained at Google's OAuth2 Playground",
+			"propertyOrder": 1
+		},
+		"client_id": {
+			"type": "string",
+			"title": "Client ID",
+			"default": "",
+			"description": "Google API client ID, you got that from Developer console",
+			"propertyOrder": 2
+		},
+		"debug_mode": {
+			"enum": [0,
+			1],
+			"type": "integer",
+			"title": "Debug mode",
+			"default": 0,
+			"description": "0 - standard output, 1 - more output",
+			"propertyOrder": 6
+		},
+		"bucket_name": {
+			"type": "string",
+			"title": "Bucket name",
+			"default": "",
+			"description": "Name of the Google Storage bucket",
+			"propertyOrder": 4
+		},
+		"max_results": {
+			"type": "integer",
+			"title": "Max results",
+			"default": 500,
+			"maximum": 1000,
+			"minimum": 10,
+			"description": "Number of objects loaded at once (10 - 1000, default 500). May influence performance, don't know what the best setting could be",
+			"propertyOrder": 5
+		},
+		"#client_secret": {
+			"type": "string",
+			"title": "Client secret",
+			"format": "password",
+			"default": "",
+			"description": "Google API client secret, you got that from Developer console",
+			"propertyOrder": 3
+		},
+		"accepted_dirnames": {
+			"type": "string",
+			"title": "Accepted directories",
+			"default": "installs,subscriptions",
+			"description": "Directories to download, possible values: subscribers, retained_installers, buyers_7d, subscriptions, gcm, ratings, crashes, installs, reviews, sales, earnings",
+			"propertyOrder": 7
+		}
+	}
 }
