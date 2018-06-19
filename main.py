@@ -45,7 +45,8 @@ else:
 	if debugMode: print("Will accept only: %s"%",".join(accepted_dirnames))
 
 #Temporary override - KBC configuration schema does not seem to work properly
-accepted_dirnames = ["installs","subscriptions", "sales", "earnings"]
+#accepted_dirnames = ["installs","subscriptions", "sales", "earnings"]
+accepted_dirnames = [] #testing purpose only, let us download zips only
 #fileBufferSize = 16 * 1024 * 1024 #16 MB
 a_token = None
 token_expiration = None
@@ -163,6 +164,7 @@ class Extractor:
 		global debugMode
 		iname = None
 		idimension = None
+		isZip = False
 		for item in items:
 			dname = os.path.dirname(item["name"]).replace("/","_")
 			if (item["name"].lower().endswith(".csv")):
@@ -180,11 +182,10 @@ class Extractor:
 					continue
 				iname = sre.group(1+reskip)
 				idimension = sre.group(5+reskip)
-				if len(accepted_dirnames)!=0:
-					if iname not in accepted_dirnames:
-						if debugMode:
-							print("Skipping %s, not wanted."%iname)
-						continue
+				if iname not in accepted_dirnames:
+					if debugMode:
+						print("Skipping %s, not wanted."%iname)
+					continue
 				if debugMode:
 					print("name: %s, dimension: %s"%(iname,idimension))
 				#if debugMode: print("Skipping %s, a .csv file, we are interested in the archives"%item["name"])
@@ -193,6 +194,8 @@ class Extractor:
 			else:
 				print("Running archive:",item["name"])
 				objects = self.GetZipObjects(item["name"])
+				isZip = True
+				print("ZIP returned %d objects"%len(objects))
 			for o in objects:
 				o = o.split("\n")
 				reader = csv.reader(o)
@@ -205,6 +208,7 @@ class Extractor:
 						tableName = "%s_%s.csv"%(iname,idimension)
 					else:
 						tableName = "%s.csv"%os.path.dirname(item["name"]).replace("/","_")
+						print("Probably zip, output table name: %s"%tableName)
 					if os.path.exists(os.path.join("/data/out/tables/",tableName)): #table is from same output/dimension but has a different header
 						if debugMode:
 							print("Data inconsistency occurred while parsing %s. I will try to manage"%item["name"])
