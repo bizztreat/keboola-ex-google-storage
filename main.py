@@ -9,7 +9,7 @@ from apiclient.discovery import build
 import json
 import os
 from hashlib import md5 as md5_obj
-from zipfile import ZipFile
+from zipfile import ZipFile, BadZipFile
 import re
 import time
 
@@ -203,7 +203,11 @@ class Extractor:
 					if debugMode:
 						print("Skipping %s, not wanted."%item["name"])
 					continue
-				objects = self.GetZipObjects(item["name"])
+				try:
+					objects = self.GetZipObjects(item["name"])
+				except BadZipFile as e:
+					print("Bad zip file {0}".format(item["name"]))
+					raise Exception(e)
 				isZip = True
 				if debugMode: print("ZIP returned %d objects"%len(objects))
 			for o in objects:
