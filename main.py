@@ -222,9 +222,9 @@ class Extractor:
 				if (not Header.Exists(md)):
 					if debugMode: print("Header is new")
 					if iname!=None:
-						tableName = "%s_%s.csv"%(iname,idimension)
+						tableName = "%s_%s_%s.csv"%(iname,idimension,md)
 					else:
-						tableName = "%s.csv"%os.path.dirname(item["name"]).replace("/","_")
+						tableName = "%s_%s.csv"%(os.path.dirname(item["name"]).replace("/","_"),md)
 					if debugMode: print("Attempting new output table name: %s"%tableName)
 					if os.path.exists(os.path.join("/data/out/tables/",tableName)): #table is from same output/dimension but has a different header
 						if debugMode:
