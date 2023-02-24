@@ -6,6 +6,7 @@ import csv
 from oauth2client import client
 import httplib2
 from apiclient.discovery import build
+from google.oauth2 import service_account
 import json
 import os
 from hashlib import md5 as md5_obj
@@ -13,33 +14,34 @@ from zipfile import ZipFile, BadZipFile
 import re
 import time
 
-
-if not os.path.exists("/data/out/tables"): os.makedirs("/data/out/tables")
+# if not os.path.exists("/data/out/tables"): os.makedirs("/data/out/tables")
 
 if not os.path.exists("/data/config.json"):
 	#Interactive mode
 	interactive_mode = True
 	print("/data/config.json not found, running in interactive debug mode")
-	r_token = input("Refresh token: ")
-	client_id = input("Client ID: ")
-	client_sercret = input("Client Secret: ")
-	bucket = input("Bucket name: ")
+	# r_token = input("Refresh token: ")
+	# client_id = input("Client ID: ")
+	# client_sercret = input("Client Secret: ")
+	bucket = ''
 	debugMode = 1
-	maxResults = int(input("Max results per page: "))
-	accepted_dirnames = input("Comma-separated list of accepted dirnames: ")
+	maxResults = 100
+	accepted_dirnames = ''
+	service_acc = {}
 else:
 	with open("/data/config.json","r") as fid:
 		config = json.load(fid)
 	#a_token is None when refreshing, obviously
 	#a_token = config["access_token"]
 	interactive_mode = False
-	r_token = config["parameters"]["#r_token"]
-	client_id = config["parameters"]["client_id"]
-	client_sercret = config["parameters"]["#client_secret"]
+	# r_token = config["parameters"]["#r_token"]
+	# client_id = config["parameters"]["client_id"]
+	# client_sercret = config["parameters"]["#client_secret"]
 	bucket = config["parameters"]["bucket_name"]
 	debugMode = int(config["parameters"]["debug_mode"])
 	maxResults = config["parameters"]["max_results"]
 	accepted_dirnames = config["parameters"]["accepted_dirnames"] #preferably defaults to ["installs", "subscribers", "subscriptions"]
+	service_acc = config["parameters"]["service_acc"]
 
 accepted_dirnames = list(map(str.strip,accepted_dirnames.split(",")))
 if accepted_dirnames[-1]=="": accepted_dirnames=accepted_dirnames[:-1]
@@ -49,15 +51,19 @@ if debugMode: print("Will accept only: %s"%",".join(accepted_dirnames))
 #accepted_dirnames = ["installs","subscriptions", "sales", "earnings"]
 #accepted_dirnames = [] #testing purpose only, let us download zips only
 #fileBufferSize = 16 * 1024 * 1024 #16 MB
-a_token = None
-token_expiration = None
+# a_token = None
+# token_expiration = None
 token_endpoint = "https://www.googleapis.com/oauth2/v4/token"
 user_agent = "ex_google_storage/1.0"
 outputFilename = "/data/out/tables/storage.csv"
 
-creds = client.GoogleCredentials(None,client_id,client_sercret,r_token,token_expiration,token_endpoint,user_agent)
-http = creds.authorize(httplib2.Http())
-creds.refresh(http)
+service_creds = service_account.Credentials.from_service_account_info(service_acc)
+#creds = client.GoogleCredentials(None,client_id,client_sercret,r_token,token_expiration,token_endpoint,user_agent)
+http = httplib2.Http()
+Service = build("storage","v1", credentials=service_creds)
+# creds.refresh(http)
+
+
 
 if debugMode:
 	print("Debug mode is on, I will talk a lot")
@@ -94,16 +100,17 @@ class Header:
 			o.Handle.close()
 
 class Extractor:
-	def __init__(self,a_token,r_token,client_id,client_sercret,bucket):
-		self.a_token = a_token
-		self.r_token = r_token
-		self.client_id = client_id
-		self.client_sercret = client_sercret
+	def __init__(self, bucket, service_creds):
+		# self.a_token = a_token
+		# self.r_token = r_token
+		# self.client_id = client_id
+		# self.client_sercret = client_sercret
 		self.Bucket = bucket
+		self.service_creds = service_creds
 		self.Credentials = None
 		self.LastRequest = None
 		self.LastResponse = None
-		self.Service = None
+		self.Service = Service
 		self.HeaderWritten = False
 		self.Handle = None
 		self.Writer = None
@@ -115,15 +122,20 @@ class Extractor:
 		self.INames = []
 		self.ExportedItems = 0
 		self.ExportedObjects  = 0
-	def RenewAccessToken(self):
-		global token_endpoint, token_expiration, user_agent
-		self.Credentials = client.GoogleCredentials(self.a_token,self.client_id,self.client_sercret,self.r_token,token_expiration,token_endpoint,user_agent)
-		self.http = self.Credentials.authorize(httplib2.Http())
-		self.Credentials.refresh(self.http)
-		self.Service = build("storage","v1",http=self.http)
+	# def RenewAccessToken(self):
+	# 	if isinstance(service_creds, dict):
+	# 		self.Service = 
+	# 		return
+	# 	global token_endpoint, token_expiration, user_agent
+	# 	self.Credentials = client.GoogleCredentials(self.a_token,self.client_id,self.client_sercret,self.r_token,token_expiration,token_endpoint,user_agent)
+	# 	self.http = self.Credentials.authorize(httplib2.Http())
+	# 	self.Credentials.refresh(self.http)
+	# 	self.Service = build("storage","v1",http=self.http)
 	def GetObject(self,name):
 		params = {"bucket": self.Bucket, "object": name.replace("/","%2F")}
-		resp, content = self.http.request("https://storage.googleapis.com/%(bucket)s/%(object)s"%params)
+		headers = {}
+		self.service_creds.apply(headers)
+		resp, content = http.request("https://storage.googleapis.com/%(bucket)s/%(object)s"%params, headers=headers)
 		content = content.decode(Charset(resp))
 		if resp.status!=200:
 			global debugMode
@@ -149,7 +161,7 @@ class Extractor:
 		return response["items"]
 	def GetZipObjects(self,name):
 		params = {"bucket": self.Bucket, "object": name.replace("/","%2F")}
-		resp, content = self.http.request("https://storage.googleapis.com/%(bucket)s/%(object)s"%params)
+		resp, content = http.request("https://storage.googleapis.com/%(bucket)s/%(object)s"%params)
 		fid = open("/data/temp.zip","wb")
 		fid.write(content)
 		fid.close()
@@ -253,8 +265,7 @@ class Extractor:
 		if self.Handle!=None: self.Handle.close()
 
 if __name__=="__main__":
-	ex = Extractor(None,r_token,client_id,client_sercret,bucket)
-	ex.RenewAccessToken()
+	ex = Extractor(service_creds=service_creds, bucket=bucket)
 	total = 0
 	print("Started writing results, this might take some time...")
 	items = ex.ListObjects()
