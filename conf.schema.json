@@ -62,6 +62,13 @@
 			"default": "installs,subscriptions",
 			"description": "Directories to download, possible values: subscribers, retained_installers, buyers_7d, subscriptions, gcm, ratings, crashes, installs, reviews, sales, earnings",
 			"propertyOrder": 7
+		},
+		"service_acc":{
+			"type": "object",
+			"title": "Service account",
+			"default": "",
+			"description": "Service account",
+			"propertyOrder": 8
 		}
 	}
 }
