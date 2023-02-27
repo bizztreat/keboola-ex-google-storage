@@ -41,7 +41,7 @@ else:
 	debugMode = int(config["parameters"]["debug_mode"])
 	maxResults = config["parameters"]["max_results"]
 	accepted_dirnames = config["parameters"]["accepted_dirnames"] #preferably defaults to ["installs", "subscribers", "subscriptions"]
-	service_acc = json.loads(config["parameters"]["service_acc"])
+	service_acc = json.loads(config["parameters"]["service_acc"]) #handle kbc input
 
 accepted_dirnames = list(map(str.strip,accepted_dirnames.split(",")))
 if accepted_dirnames[-1]=="": accepted_dirnames=accepted_dirnames[:-1]
