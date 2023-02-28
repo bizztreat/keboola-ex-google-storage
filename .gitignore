@@ -1,2 +1,5 @@
+venv/
 /vendor
 /data
+out/
+config.json
